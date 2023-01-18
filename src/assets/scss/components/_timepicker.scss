@@ -1,0 +1,123 @@
+.app-dark, .app-light{
+    display: flex;
+    justify-content: center;
+}
+.app-dark .react-timekeeper__clock-wrapper {
+    background-color: #7e7e7e;
+    padding: 18px 0;
+    .react-timekeeper-button-reset{
+        color: $theme-body-font-color !important;
+    }
+}
+.App .react-timekeeper__clock-wrapper>div:last-of-type {
+    padding: 0 10px;
+    position: relative;
+    z-index: 7;
+    top: 0;
+}
+.App .react-timekeeper__top-bar {
+    padding: 4px;
+}
+.App .react-timekeeper__top-bar .react-timekeeper__tb-minute-wrapper {
+    width: auto;
+}
+.App .react-timekeeper__top-bar * {
+    font-size: 22px !important;
+}
+.App .react-timekeeper__done-button {
+    padding: 12px;
+}
+.timepicker-form{
+    .react-timekeeper__clock{
+        ~ div{
+            z-index: 7;
+        }
+    }
+    .react-timekeeper__hand-circle-outer{
+        fill: var(--theme-deafult);
+    }
+    .react-timekeeper__clock-hand{
+        stroke: var(--theme-deafult);
+    }
+    .react-timekeeper__clock-wrapper{
+        .react-timekeeper-button-reset{
+            background-color: #E1EFF6;
+        }
+    }
+    .react-timekeeper__top-bar{
+        background-color:  var(--theme-deafult) !important;
+    }
+    .react-timekeeper__tb-hour, .react-timekeeper__tb-colon, .react-timekeeper__tb-minute, .react-timekeeper-button-reset{
+        color: $white !important;
+    }
+    .row{
+        > div{
+            &:last-child{
+                .card{
+                    .card-body{
+                        .theme-form{
+                            div.mb-0{
+                                display: flex;
+                                justify-content: space-around;
+                                .react-timekeeper{
+                                    &:first-child{
+                                        .react-timekeeper__top-bar{
+                                            padding: 14px 8px;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+@media screen and (max-width: 767px){
+    .timepicker-form{
+        .row{
+            > div{
+                &:last-child{
+                    .card{
+                        .card-body{
+                            .theme-form{
+                                div.mb-0{
+                                    display: block;
+                                    .react-timekeeper{  
+                                        display: block;
+                                        margin: 0 auto;
+                                        + .react-timekeeper{
+                                            margin-top: 15px;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+@media screen and (max-width: 360px){
+    .timepicker-form{
+        .row{
+            > div{
+                &:last-child{
+                    .card{
+                        .card-body{
+                            .theme-form{
+                                div.mb-0{
+                                    .react-timekeeper{  
+                                        width: 240px !important;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

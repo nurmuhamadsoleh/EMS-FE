@@ -1,0 +1,11 @@
+.eye-password {
+  background-color: rgb(196, 245, 228);
+  width: auto;
+  padding-left: 7px;
+  padding: 0.4rem;
+  border-radius: 3px;
+  color: black;
+  margin-left: -28px;
+  margin-top: -5px;
+  font-size: 27px;
+}

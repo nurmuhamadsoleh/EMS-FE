@@ -1,0 +1,37 @@
+/**=====================
+     54. Tour  CSS Start
+==========================**/
+.reactour__helper {
+  span[data-tour-elem="badge"] {
+    background: $primary-color !important;
+    height: unset !important;
+  }
+  .reactour__dot,
+  button {
+    &:focus {
+      outline: none;
+    }
+  }
+  &:focus {
+    outline: none;
+  }
+}
+.reactour__dot--is-active {
+  color: $primary-color !important;
+  background: $primary-color !important;
+}
+.gtkSUb {
+  right: 18px !important;
+}
+.carousel{
+  .carousel-indicators{
+      font-size: 0;
+  }
+  ~ hr{
+      margin-bottom: 0;
+      color: $transparent-color;
+  }
+}
+/**=====================
+    54. Tour  CSS Ends
+==========================**/
