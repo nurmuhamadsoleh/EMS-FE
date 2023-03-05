@@ -37,7 +37,7 @@ const Calculate = () => {
   const getData = useCallback(async () => {
     showLoader();
     await axios({
-      url: `${url.api}/billing/calculate?search=${keyword}?page=${page}`,
+      url: `${url.api}/billing/calculate?page=1`,
       method: "POST",
       headers: tokenHeader(),
       data: {},
@@ -46,6 +46,7 @@ const Calculate = () => {
         console.log(res.data);
         if (res.status === 200) {
           let data = res.data;
+          console.log("row billing",data)
           console.log('biling', data)
           setBilling(data.rows);
           setPage(data.page);

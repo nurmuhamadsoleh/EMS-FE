@@ -47,7 +47,7 @@ const AlarmHistory = () => {
         console.log(res.data);
         if (res.status === 200) {
           let data = res.data;
-          // console.log('data alarm',data);
+          console.log('data alarm',data);
           setAlarm(data.rows);
           setPage(data.page);
           setPages(data.totalPage);
@@ -65,7 +65,6 @@ const AlarmHistory = () => {
   useEffect(() => {
     getData();
   }, [page, keyword]);
-  console.log('alarm',alarm)
   const handleSearch = (e) => {
     e.preventDefault();
     setPage(1);
@@ -103,7 +102,7 @@ const AlarmHistory = () => {
           <div className="row mb-5">
             <div className="col-md-6 d-flex justify-content-start align-items-start">
               <h1 className="fw-bold fs-3">
-                <FiBell /> Alarm History
+                <FiBell /> Alarm Today
               </h1>
             </div>
             <div
@@ -125,7 +124,7 @@ const AlarmHistory = () => {
               >
                 <div className="mb-3">
                   <Button color="primary" onClick={alarmHistory}>
-                    <FiSearch /> Alarm Today
+                    <FiSearch /> Alarm History
                   </Button>
                 </div>
                 <div className="col-sm-12 d-flex justify-content-end align-items-end">
@@ -174,7 +173,7 @@ const AlarmHistory = () => {
                 </Button>
               </Col>
               <Col className="col-sm-4">
-                <form className="row pe-2">
+                <form className="row pe-2" onSubmit={handleSearch}>
                   <div className="col-auto">
                     <input
                       type="text"
@@ -214,23 +213,32 @@ const AlarmHistory = () => {
                   </tr>
                 </thead>
                 <tbody>
+                  {/* {alarm.length <= 0 (<tr className="table-active">
+                  <td className="table-active text-danger fw-bold">Data NUll</td>
+                  </tr>) : ()} */}
                   {alarm.map((comment) => (
-                    <tr className="table-active" key={comment.id}>
-                      <td className="table-active">{comment.id_alarm}</td>
-                      <td className="table-active">{comment.alarmtype}</td>
-                      <td className="table-active">{comment.id_seria}</td>
-                      <td className="table-active">{`${comment.id_serial} | ${comment.area} / ${comment.lokasi}`}</td>
-                      <td className="table-active">{comment.alarmlog}</td>
-                      <td className="table-active">
-                        {moment().subtract(1, "days").format(comment.datetime)}
-                      </td>
-                      <td className="table-active">
-                        {moment().subtract(1, "days").format(comment.created)}
-                      </td>
-                      <td className="table-active">
-                        {moment().subtract(1, "days").format(comment.updated)}
-                      </td>
-                    </tr>
+                    <>
+                    {console.log('comment', comment)}
+                    {comment === null ? <tr className="table-active">
+                    <td className="table-active text-danger fw-bold">Data NUll</td>
+                    </tr> : <tr className="table-active" key={comment.id_alarm}>
+                    <td className="table-active">{comment.id_alarm}</td>
+                    <td className="table-active">{comment.alarmtype}</td>
+                    <td className="table-active">{comment.id_serial}</td>
+                    <td className="table-active">{`${comment.id_serial} | ${comment.area} / ${comment.lokasi}`}</td>
+                    <td className="table-active">{comment.alarmlog}</td>
+                    <td className="table-active">
+                      {moment().subtract(1, "days").format(comment.datetime)}
+                    </td>
+                    <td className="table-active">
+                      {moment().subtract(1, "days").format(comment.created)}
+                    </td>
+                    <td className="table-active">
+                      {moment().subtract(1, "days").format(comment.updated)}
+                    </td>
+                  </tr> }
+                    </>
+                    
                   ))}
                 </tbody>
               </table>

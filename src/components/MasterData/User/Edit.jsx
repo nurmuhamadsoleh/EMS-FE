@@ -77,8 +77,10 @@ const ManagementUserEdit = () => {
       //     /^[A-Z0-9._%+-]+@(?=gmail.com)[A-Z0-9.-]+\.[A-Z]{2,}$/i,
       //     "Harus menggunakan gmail.com"
       //   ),
-      level: yup.string().required("Field Level Authentication Wajib di isi"),
-      aktif: yup.string().required("Field Status Akun Wajib di isi"),
+      // level: yup.string().required(),
+    }).shape({
+      level: yup.string().required("Field Level Authentication Wajib di isi").nullable(),
+      aktif: yup.string().required("Field Status Akun Wajib di isi").nullable(),
     })
     .required();
   const {
@@ -94,7 +96,7 @@ const ManagementUserEdit = () => {
     defaultValues: initialValues,
     resolver: yupResolver(validationSchema),
   });
-  const getDataUser = useCallback(async () => {
+  const getDataUser = async () => {
     showLoader();
     await axios({
       method: "GET",
@@ -119,7 +121,7 @@ const ManagementUserEdit = () => {
         hideLoader();
         Swal.fire("Sorry", "Data Gagal Di Tampilkan", "warning");
       });
-  }, []);
+  };
   const styleInput = {
     width: "100%",
     borderRadius: "5px",
@@ -181,7 +183,10 @@ const ManagementUserEdit = () => {
     //   getDataUser();
     //   abortController.abort();
     // };
-  }, [getDataUser]);
+  }, []);
+  console.log('level', watch("level"))
+  console.log('aktif', watch("aktif"))
+
   return (
     <Fragment>
       <Container style={{width: "80%", marginTop: "120px"}}>
@@ -288,9 +293,9 @@ const ManagementUserEdit = () => {
                       id="level"
                       name="level"
                       type="radio"
-                      value="usr"
-                      checked={watch("level") === "usr" || watch("level" === "USR")}
-                      onClick={() => setValue("level", "usr") || setValue("level", "USR")}
+                      value="USR"
+                      checked={watch("level") === "USR"}
+                      onClick={() => setValue("level", "USR")}
                       {...register("level")}
                       className="m-3 p-0"
                     />
@@ -299,9 +304,10 @@ const ManagementUserEdit = () => {
                       id="level"
                       name="level"
                       type="radio"
-                      value="adm"
-                      checked={watch("level") === "adm" || watch("level") === "ADM"}
-                      onClick={() => setValue("level", "adm" ) || setValue("level", "ADM")}
+                      value="ADM"
+                      checked={watch("level") === "ADM"}
+                      onClick={() => setValue("level", "ADM")}
+
                       {...register("level")}
                       className="m-3 p-0"
                     />
@@ -324,7 +330,7 @@ const ManagementUserEdit = () => {
                       id="level"
                       name="level"
                       type="radio"
-                      value="usr"
+                      value="N"
                       checked={watch("aktif") === "N"}
                       onClick={() => setValue("aktif", "N")}
                       {...register("aktif")}
@@ -335,7 +341,7 @@ const ManagementUserEdit = () => {
                       id="level"
                       name="level"
                       type="radio"
-                      value="adm"
+                      value="Y"
                       checked={watch("aktif") === "Y"}
                       onClick={() => setValue("aktif", "Y")}
                       {...register("aktif")}

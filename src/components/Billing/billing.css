@@ -31,3 +31,15 @@
   margin-left: 14px;
   /* display: block; */
 }
+.new-css-rule{
+  background-color: white;
+  height: 300px;
+  width: auto;
+  color: black;
+  font-weight: 700;
+  overflow: visible;
+  /* overflow-y: hidden; */
+}
+/* body{
+  background-color: aqua;
+} */

@@ -217,7 +217,7 @@ const MasterData = () => {
               >
                 <thead>
                   <tr className="text-center">
-                    <th scope="col text-center">ID Meter</th>
+                    <th scope="col text-center">ID</th>
                     <th scope="col text-center">Type</th>
                     <th scope="col text-center">Serial</th>
                     <th scope="col text-center">Name</th>
@@ -233,7 +233,7 @@ const MasterData = () => {
                   {meterData.map((item) => (
                     <tr className="table-active" key={item.id_meter}>
                      
-                      <td className="table-active">{item.id_meter}</td>
+                      <td className="table-active">{item.id_serial}</td>
                       <td className="table-active">{item.type}</td>
                       <td className="table-active">{item.id_serial}</td>
                       <td className="table-active">{item.id_name}</td>
@@ -274,7 +274,7 @@ const MasterData = () => {
               </p>
               <TableShow
                 showValue={limit}
-                dataList={[5, 10, 25, 50, 100]}
+                dataList={[5, 10, 25, 50]}
                 handleChange={(e) => {
                   if (e !== "undefined") {
                     setLimit(e);

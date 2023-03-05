@@ -122,6 +122,11 @@ export const routes = [
     Component: <Billing />,
     aksesrole: "USR",
   },
+  {
+    path: `${process.env.PUBLIC_URL}/calculate/${layout}/`,
+    Component: <Calculate />,
+    aksesrole: "USR",
+  },
   // Variabel
   {
     path: `${process.env.PUBLIC_URL}/variabel/${layout}/`,

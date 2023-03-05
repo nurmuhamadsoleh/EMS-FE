@@ -17,7 +17,7 @@ const DashbaordUser = () => {
   const nav = useNavigate();
   const [user, setUser] = useState([]);
   const [loader, showLoader, hideLoader] = useFullPageLoader();
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState();
   const [pages, setPages] = useState(1);
   const [page, setPage] = useState(1);
   const [keyword, setKeyword] = useState("");
@@ -27,7 +27,9 @@ const DashbaordUser = () => {
   const componentRef = useRef();
   const [role, setRole] = useState(null);
 
-  const getData = async () => {
+  const getData = async (limit =10, page =1) => {
+    setLimit(limit)
+    setPage(page)
     showLoader();
     await axios({
       url: `${url.api}/user?search_query=${keyword}&page=${page}&limit=${limit}`,
@@ -38,9 +40,8 @@ const DashbaordUser = () => {
       .then((res) => {
         if (res.status === 200) {
           let data = res.data;
-          console.log('data user', data.rows)
           setUser(data.rows);
-          setPage(data.page);
+          // setPage(data.page);
           setPages(data.totalPage);
           setRows(data.count);
           hideLoader();
@@ -68,11 +69,13 @@ const DashbaordUser = () => {
     XLSX.writeFile(wb, `${new Date()} Report.xls`);
   };
   const changePage = (data) => {
-    setPage(data.selected + 1);
+    let sum = data.selected + 1;
+    setPage(sum);
+    getData(limit, sum);
+
   };
   
   const onClickDelete = (id) => {
-    console.log("idnya", id);
     Swal.fire({
       title: "Apa anda yakin?",
       text: "Apakah ada yakin ingin menghapus data ini!",
@@ -92,7 +95,7 @@ const DashbaordUser = () => {
         })
           .then((res) => {
             Swal.fire("Berhasil!", "Data berhasil di hapus.", "success");
-            getData();
+            getData(limit, page);
             hideLoader();
           })
           .catch((err) => {
@@ -108,13 +111,13 @@ const DashbaordUser = () => {
     });
   };
   useEffect(() => {
-    getData();
+    getData(limit, page);
     let token = localStorage.getItem("token");
     let role = localStorage.getItem("role");
     if (!token && !role) {
       return (window.location.href = `${process.env.PUBLIC_URL}`);
     }
-  }, [page, query, limit]);
+  }, []);
   const defaultLayoutObj = classes.find(
     (item) => Object.values(item).pop(1) === "compact-wrapper"
   );
@@ -132,7 +135,6 @@ const DashbaordUser = () => {
     // pada saat pencarian kembalikan page ke 0 karena ingin melakukan relasi antar pencarian dengan pagination
     setPage(1);
     setKeyword(query);
-    console.log("query", query);
   };
   return (
     <>
@@ -222,7 +224,7 @@ const DashbaordUser = () => {
                       <td className="table-active">{item.email}</td>
                       <td className="table-active">{item.nama}</td>
                       <td className="table-active">{item.level}</td>
-                      <td className="table-active">{item.aktif ? "Y" : "N"}</td>
+                      <td className="table-active">{item.aktif == "Y" ? "Y" : "N"}</td>
                       <td className="table-active w-25">
                         <div className="row">
                           <div className="col-sm-6">
@@ -258,9 +260,7 @@ const DashbaordUser = () => {
                 dataList={[5, 10, 25, 50, 100]}
                 handleChange={(callback) => {
                   if (callback != "undefined") {
-                    setLimit(callback);
-                    setPage(0);
-                    getData(1, callback);
+                    getData(callback, page);
                   }
                 }}
               />

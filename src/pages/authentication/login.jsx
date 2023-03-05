@@ -72,14 +72,16 @@ const Login = () => {
   });
 
   const handleChange = async (data) => {
-    console.log("response api", url);
+    let post = data
+    // console.log("response api", url);
+    console.log('data login', data)
     setLoading(true);
     try {
       let response = await axios({
-        url: `${url.api}/auth/login`,
+        url: "http://localhost:5000/auth/login",
         method: "POST",
-        headers: tokenHeader(),
-        data: data,
+        headers: publicHeader(),
+        data: post,
       });
       if (response.status === 200) {
         console.log("res", response);

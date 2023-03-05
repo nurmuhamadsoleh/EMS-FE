@@ -35,7 +35,7 @@ const styleInput = {
 const ManagementUserAdd = () => {
   const nav = useNavigate();
   let [showPass, setShowPass] = useState(false);
-  let [showPassConfirm, setShowPassConfirm] = useState(false);
+  // let [showPassConfirm, setShowPassConfirm] = useState(false);
   const defaultLayoutObj = classes.find(
     (item) => Object.values(item).pop(1) === "compact-wrapper"
   );
@@ -49,7 +49,7 @@ const ManagementUserAdd = () => {
     // confirmpassword: "",
     email: "",
     level: "",
-    // status: "",
+    status: "",
   };
   const [initialValues, setInitialValue] = useState(iniState);
   const validationSchema = yup
@@ -73,8 +73,8 @@ const ManagementUserAdd = () => {
       //   .oneOf([yup.ref("password")], "Password Tidak Sama!"),
 
       email: yup.string().email().required("Field Email Wajib di isi"),
-      level: yup.string().required("Field Level Authentication Wajib di isi"),
-      // status: yup.string().required("Field Status Akun Wajib di isi"),
+      level: yup.string().required("Field Level Authentication Wajib di isi").nullable(),
+      status: yup.string().required("Field Status Akun Wajib di isi").nullable(),
     })
     .required();
   // const handleSubmitData = (data) => {
@@ -304,22 +304,22 @@ const ManagementUserAdd = () => {
                   id="level"
                   name="level"
                   type="radio"
-                  value="usr"
-                  onClick={() => setValue("level", "usr")}
-                  {...register("level")}
-                  className="m-3 p-0"
-                />
-                <Label className="fw-bold text-light">Admin</Label>
-                <input
-                  id="level"
-                  name="level"
-                  type="radio"
-                  value="adm"
-                  onClick={() => setValue("level", "adm")}
+                  value="USR"
+                  onClick={() => setValue("level", "USR")}
                   {...register("level")}
                   className="m-3 p-0"
                 />
                 <Label className="fw-bold text-light">User</Label>
+                <input
+                  id="level"
+                  name="level"
+                  type="radio"
+                  value="ADM"
+                  onClick={() => setValue("level", "ADM")}
+                  {...register("level")}
+                  className="m-3 p-0"
+                />
+                <Label className="fw-bold text-light">Admin</Label>
               </FormGroup>
             </div>
             {errors?.level && (
@@ -328,7 +328,7 @@ const ManagementUserAdd = () => {
               </p>
             )}
           </FormGroup>
-          {/* <FormGroup>
+          <FormGroup>
             <div className="d-flex justify-content-start w-100 align-items-center">
               <Label
                 for="status"
@@ -360,12 +360,12 @@ const ManagementUserAdd = () => {
                 <Label className="fw-bold text-light">Non Aktif</Label>
               </FormGroup>
             </div>
-            {errors?.level && (
+            {errors?.status && (
               <p className="fw-bold text-danger text-center">
-                {errors?.level.message}
+                {errors?.status.message}
               </p>
             )}
-          </FormGroup> */}
+          </FormGroup>
           <FormGroup check row>
             <Col className="col-sm-12 d-flex justify-content-center">
               <Button

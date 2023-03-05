@@ -15,6 +15,6 @@ export const tokenHeader = () => {
   };
 };
 export const url = {
-  app: "http://localhost:3006",
+  app: "http://localhost:3001",
   api: 'http://localhost:5000',
 };

@@ -1,0 +1,11 @@
+.card-digital{
+    width: "300px";
+    background-color:"red";
+    border-radius: 5;
+    padding-right: 10;
+    margin-left: "20px";
+    margin-top: "50px";
+}
+body{
+    background-color: black;
+}

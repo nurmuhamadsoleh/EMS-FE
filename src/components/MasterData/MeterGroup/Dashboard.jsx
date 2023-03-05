@@ -130,7 +130,6 @@ const DataTable = () => {
     // pada saat pencarian kembalikan page ke 0 karena ingin melakukan relasi antar pencarian dengan pagination
     setPage(1);
     setKeyword(query);
-    console.log("query", query);
   };
   useEffect(() => {
     getData();

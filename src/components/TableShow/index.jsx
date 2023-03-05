@@ -1,7 +1,7 @@
 import React from "react";
 
 const TableShow = (props) => {
-  const { dataList = [10, 25, 50, 100], showValue = 10, handleChange } = props;
+  const { dataList = [5, 10, 25, 50], showValue = 10, handleChange } = props;
   return (
     <div
       style={{

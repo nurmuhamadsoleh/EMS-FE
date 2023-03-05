@@ -15,6 +15,7 @@ import {
   Button,
   Col,
   Row,
+  Input,
 } from "reactstrap";
 import Swal from "sweetalert2";
 import axios from "axios";
@@ -32,7 +33,7 @@ const MasterDataEdit = () => {
   const [loader, showLoader, hideLoader] = useFullPageLoader();
 
   const iniState = {
-    id_meter: "",
+    // id_meter: "",
     type: "",
     id_serial: "",
     id_name: "",
@@ -62,7 +63,7 @@ const MasterDataEdit = () => {
   let [meterData, setMeterData] = useState([]);
   const validationSchema = yup
     .object({
-      id_meter: yup.string().required("Field Meter ID Wajib Di isi"),
+      // id_meter: yup.string().required("Field Meter ID Wajib Di isi"),
       type: yup.string().required("Field Meter Type Wajib Di isi"),
       id_serial: yup.string().required("Field Meter SN Wajib Di isi"),
       id_name: yup
@@ -90,13 +91,15 @@ const MasterDataEdit = () => {
         .integer()
         .required("Field Daya Wajib di isi"),
       // Fild Belum ada
-      alarm_to_yesno: yup.boolean().required("Field timeout Wajib di isi"),
+      // alarm_to_yesno: yup.boolean().required("Field timeout Wajib di isi"),
+      alarm_to_yesno:yup.boolean().required("Accept terms is required"),
       alarm_to_high_limit: yup
         .number()
         .positive()
         .integer()
         .required("Field timeout Wajib di isi"),
-      alarm_vt_yesno: yup.boolean().required("Field voltage Wajib di isi"),
+      // alarm_vt_yesno: yup.boolean().required("Field voltage Wajib di isi"),
+      alarm_vt_yesno: yup.array().min(1).nullable(),
       alarm_vt_low_limit: yup
         .number()
         .positive()
@@ -107,38 +110,44 @@ const MasterDataEdit = () => {
         .positive()
         .integer()
         .required("Field voltage Wajib di isi"),
-      alarm_uc_yesno: yup.boolean().required("Field current Wajib di isi"),
+      // alarm_uc_yesno: yup.boolean().required("Field current Wajib di isi"),
+      alarm_uc_yesno: yup.array().min(1).nullable(),
       alarm_uc_high_limit: yup
         .number()
         .positive()
         .integer()
         .required("Field current Wajib di isi"),
-      alarm_oc_yesno: yup.boolean().required("Field Over Wajib di isi"),
+      alarm_oc_yesno : yup.array().min(1).nullable(),
+      // alarm_oc_yesno: yup.boolean().required("Field Over Wajib di isi"),
       alarm_oc_high_limit: yup
         .number()
         .positive()
         .integer()
         .required("Field Over Wajib di isi"),
-      alarm_pf_yesno: yup.boolean().required("Field power factor Wajib di isi"),
+      alarm_pf_yesno: yup.array().min(1).nullable(),
+      // alarm_pf_yesno: yup.boolean().required("Field power factor Wajib di isi"),
       alarm_pf_low_limit: yup
         .number()
         .positive()
         // .integer()
         .required("Field power factor Wajib di isi"),
-      alarm_rp_yesno: yup
-        .boolean()
-        .required("Field harmonic voltage Wajib di isi"),
-      alarm_hv_yesno: yup
-        .boolean()
-        .required("Field harmonic voltage Wajib di isi"),
+      alarm_rp_yesno: yup.array().min(1).nullable(),
+      alarm_hv_yesno: yup.array().min(1).nullable(),
+      // alarm_rp_yesno: yup
+      //   .boolean()
+      //   .required("Field harmonic voltage Wajib di isi"),
+      // alarm_hv_yesno: yup
+      //   .boolean()
+      //   .required("Field harmonic voltage Wajib di isi"),
       alarm_hv_high_limit: yup
         .number()
         .positive()
         .integer()
         .required("Field harmonic voltage Wajib di isi"),
-      alarm_hc_yesno: yup
-        .boolean()
-        .required("Field harmonic current Wajib di isi"),
+      // alarm_hc_yesno: yup
+      //   .boolean()
+      //   .required("Field harmonic current Wajib di isi"),
+      alarm_hc_yesno: yup.array().min(1).nullable(),
       alarm_hc_high_limit: yup
         .number()
         .positive()
@@ -159,7 +168,7 @@ const MasterDataEdit = () => {
     defaultValues: initialValues,
     resolver: yupResolver(validationSchema),
   });
-  const getAll = useCallback(async () => {
+  const getAll = async () => {
     showLoader();
     await axios({
       url: `${url.api}/metergroup/alldata`,
@@ -181,10 +190,10 @@ const MasterDataEdit = () => {
         hideLoader();
         Swal.fire("Sorry", "Data Gagal Di Tampilkan", "error");
       });
-  }, []);
+  };
   useEffect(() => {
     getAll();
-  }, [getAll]);
+  }, []);
   console.log("data meterdata", meterData);
   const getDataKaryawan = useCallback(async () => {
     showLoader();
@@ -198,7 +207,7 @@ const MasterDataEdit = () => {
         if (res.status == 200) {
           let data = res.data;
           console.log('data meterdata', data)
-          setValue("id_meter", data?.id_meter);
+          // setValue("id_meter", data?.id_meter);
           setValue("type", data?.type);
           setValue("id_serial", data?.id_serial);
           setValue("id_name", data?.id_name);
@@ -211,7 +220,7 @@ const MasterDataEdit = () => {
           setValue("alarm_to_high_limit", data?.alarm_to_high_limit);
           setValue("alarm_vt_yesno", data?.alarm_vt_yesno);
           setValue("alarm_vt_low_limit", data?.alarm_vt_low_limit);
-          setValue("alarm_vt_high_limitt", data?.alarm_vt_high_limit);
+          setValue("alarm_vt_high_limit", data?.alarm_vt_high_limit);
           setValue("alarm_uc_yesno", data?.alarm_uc_yesno);
           setValue("alarm_uc_high_limit", data?.alarm_uc_high_limit);
           setValue("alarm_oc_yesno", data?.alarm_oc_yesno);
@@ -233,6 +242,7 @@ const MasterDataEdit = () => {
         Swal.fire("Sorry", "Data Gagal Di Tampilkan", "warning");
       });
   }, []);
+  console.log('metergorupid', watch("metergroupid"))
   const styleInput = {
     width: "100%",
     borderRadius: "5px",
@@ -295,7 +305,11 @@ const MasterDataEdit = () => {
   };
   useEffect(() => {
     getDataKaryawan();
-  }, [getDataKaryawan]);
+  }, []);
+  meterData.map((item)=>(
+    console.log(item.metergroupname)
+  ))
+  console.log('checkbox', watch("alarm_to_yesno"))
   return (
     <>
       <Container style={{ width: "80%", marginTop: "120px" }}>
@@ -319,19 +333,20 @@ const MasterDataEdit = () => {
             </Col>
             <Col sm={6} md={6} lg={12}>
               <input
-                id="meterID"
-                name="meterID"
-                placeholder="Masukan MeterID Anda"
+                id="id_serial"
+                name="id_serial"
+                placeholder="Masukan Id serial Anda"
+                disabled
                 type="text"
-                defaultValue={watch("id_meter")}
-                {...register("id_meter")}
+                defaultValue={watch("id_serial")}
+                {...register("id_serial")}
                 style={styleInput}
                 className={`form-control ${
-                  errors.id_meter?.message ? "is-invalid" : "is-valid"
+                  errors.id_serial?.message ? "is-invalid" : "is-valid"
                 }`}
               />
               {errors.id_meter && (
-                <p className="fw-bold text-danger">{errors.id_meter.message}</p>
+                <p className="fw-bold text-danger">{errors.id_serial.message}</p>
               )}
             </Col>
           </FormGroup>
@@ -410,6 +425,16 @@ const MasterDataEdit = () => {
             </Col>
 
             <Col sm={6} md={6} lg={12}>
+              <Input id="metergroupid" 
+              name="metergroupid" 
+              style={styled} 
+              type="select" 
+              defaultValue={watch("metergroupid")} 
+              {...register("metergroupid")}>
+              {meterData?.map((d)=>(
+                <option value={d.metergroupid}>{d.metergroupname}</option>
+              ))}
+              </Input>
               {/* <select
                 // className={`form-control ${
                 //   errors.metergroupid?.message ? "is-invalid" : "is-valid"
@@ -419,12 +444,12 @@ const MasterDataEdit = () => {
               >
                 
               </select> */}
-              {meterData.map((item, index) => {
+              {/* {meterData.map((item, index) => {
                   <option key={index} value={item.metergroupid}>
                     console.log('item meter',item.metergroupname)
                     {item.metergroupname}
                   </option>;
-                })}
+                })} */}
             </Col>
           </FormGroup>
           <FormGroup>
@@ -530,8 +555,9 @@ const MasterDataEdit = () => {
                     type="checkbox"
                     {...register("alarm_to_yesno")}
                     // value={true}
-                    defaultValue={watch("alarm_to_yesno")}
-                    // checked={true}
+                    // defaultValue={watch("alarm_to_yesno")}
+                    onChange={()=>!setValue("alarm_to_yesno", 0)}
+                    checked={watch("alarm_to_yesno")}
                     // defaultChecked={true}
                   />
                 </Col>
@@ -585,10 +611,10 @@ const MasterDataEdit = () => {
                     {errors?.alarm_to_yesno.message}
                   </p>
                 )}
-                {/* <Col sm={2}>
+                <Col sm={2}>
                   <Label for="voltage">Low Limit</Label>
-                </Col> */}
-                {/* <Col sm={3}>
+                </Col>
+                <Col sm={3}>
                   <input
                     type="number"
                     placeholder="Low Limit"
@@ -601,7 +627,7 @@ const MasterDataEdit = () => {
                         : "is-valid"
                     }`}
                   />
-                </Col> */}
+                </Col>
                 <Col sm={2}>
                   <Label for="voltage">High Limit</Label>
                 </Col>

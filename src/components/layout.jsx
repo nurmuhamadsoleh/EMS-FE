@@ -40,7 +40,7 @@ const AppLayout = () => {
             <Header />
             <div className="page-body-wrapper">
               <Sidebar />
-              <div className="page-body bg-danger">
+              <div className="page-body">
                 <Outlet />
               </div>
               <Footer />

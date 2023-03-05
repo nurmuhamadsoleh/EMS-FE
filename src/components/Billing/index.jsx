@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { json, Link, useNavigate } from "react-router-dom";
 import { MultiSelect } from "react-multi-select-component";
+import TimePicker from "react-time-picker";
 import { tokenHeader, url } from "../../helpers/config";
 import {
   FiSave,
@@ -36,70 +37,98 @@ import {
 } from "reactstrap";
 
 const Billing = () => {
-  var year = 2014;
-  var month = 5;
-  var day = 10;
   const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
   const [selected, setSelected] = useState([]);
-  const [time, setTime] = useState(new Date());
-  const [multidataApi, setMultidata] = useState([{ value: 'duren', label: 'Belah duren' }]);
+  const [multidata, setMultidata] = useState([]);
+  const [serial, setSerial] = useState('');
   // { value: 'strawberry', label: 'Strawberry' },
   // { value: 'vanilla', label: 'Vanilla' }]);
-  const multidata = [
-    { value: 'chocolate', label: 'Chocolate' },
-    { value: 'strawberry', label: 'Strawberry' },
-    { value: 'vanilla', label: 'Vanilla' }
-  ]
-  const [serial, setSerial] = useState('');
+  // const multidata = [
+  // ]
+  const [update, setUpdate] = useState({
+    tariflwbp: "",
+    tarifwbp: "",
+    var_date_from: moment(startDate).format("YYYY-MM-DD"),
+    time_from: "",
+    var_date_end: moment(endDate).format("YYYY-MM-DD"),
+    time_end: "",
+    meters: '',
+  });
+  let dataMeter = [];
+  multidata.map((d) => {
+    let object = {};
+    object["label"] = d.id_name;
+    object["value"] = d.id_serial;
+    return dataMeter.push(object);
+  })
+  let resultSelected = [];
+  selected.map((d) => {
+    let meterGroup = d.value;
+    return resultSelected.push(meterGroup);
+  })
+  console.log('resultselected', JSON.stringify(resultSelected))
+  // setSerial(resultSelected);
+  // console.log("serial", resultSelected)
+  let dataJoin = resultSelected.join();
+  // console.log("serial", dataJoin);
+  // console.log("date", JSON.stringify(moment(startDate).format("YYYY-MM-DD")))
+  // setSerial(dataJoin);
+  // console.log("update serial", serial)
+  useEffect(() => {
+    let dataJoin = resultSelected.join();
+    setSerial(dataJoin)
+    console.log('serr ', serial);
+    // Hanya melakukan copy semua variabel state update, tetapi value default state tidk melakuka copy, jadi perlu
+    //melakukan define ulang untuk copy value yang memilki state terpisah seperti startdate dan enddate
+    setUpdate({ ...update, var_date_from: moment(startDate).format("YYYY-MM-DD"), 
+    var_date_end: moment(endDate).format("YYYY-MM-DD"),
+    meters: JSON.stringify(resultSelected) })
+  }, [selected])
+
   const [meterData, setMeterData] = useState({
-    meterdata: [],
-    area: "",
+    // meterdata: [],
     tarifwbp: "",
     tariflwbp: "",
   });
   const [profile, setProfile] = useState(null);
   const nav = useNavigate();
-  const [update, setUpdate] = useState({
-    tariflwbp: "",
-    tarifwbp: "",
-    startDate: "",
-    startTime: "",
-    endDate: "",
-    endTime: "",
-  });
-  console.log("meterdata", meterData);
-  const handleBilling = (e) => {
-    console.log(e);
-    // setBilling.push
-  };
+  // console.log("meterdata", meterData);
+  //Nanti ini yang dikirim ke state e.setValue
+  // console.log()
+  // const handleBilling = (e) => {
+  //   console.log(e);
+  //   // setBilling.push
+  // };
 
   const getData = useCallback(async () => {
-    let post = update;
+    // let post = update;
     showLoader();
     await axios({
       url: `${url.api}/billing?username=${profile}`,
       method: "GET",
       headers: tokenHeader(),
+      data: {},
     })
       .then((res) => {
         if (res.status === 200) {
           let data = res.data.data;
-
+          setMultidata(data.meterdata);
           setMeterData({
-            meterdata: data.meterdata,
+            // meterdata: data.meterdata,
             tarifwbp: data.tarif_wbp,
             tariflwbp: data.tarif_lwbp,
           });
 
-          let penampungmulti = [];
-          meterData.meterdata.map((val,i)=> {
-            let multi = {};
-            multi['label'] = val.id_name;
-            multi['value'] = val.id_serial;
-            return penampungmulti.push(multi);
-          })
-          setMultidata(penampungmulti)
-          console.log('penampung multi', penampungmulti)
+          // let penampungmulti = [];
+          // meterData.meterdata.map((val,i)=> {
+          //   let multi = {};
+          //   multi['label'] = val.id_name;
+          //   multi['value'] = val.id_serial;
+          //   return penampungmulti.push(multi);
+          //   // return multidata.push(multi)
+          // })
+          // setMultidata(penampungmulti)
           hideLoader();
         }
       })
@@ -117,14 +146,23 @@ const Billing = () => {
     getData();
     let profile = localStorage.getItem("profile");
     setProfile(profile);
-  }, [getData]);
+  }, []);
   const defaultLayoutObj = classes.find(
     (item) => Object.values(item).pop(1) === "compact-wrapper"
   );
+
   const layout =
     localStorage.getItem("layout") || Object.keys(defaultLayoutObj).pop();
   const [loader, showLoader, hideLoader] = useFullPageLoader();
-  console.log("start date", startDate);
+  // console.log("start date", startDate);
+  console.log('penampung multi', multidata)
+  console.log('update', update);//hasil dari setUpdate yang akan di kirim kan ke Database
+  const handleDelete = (e) => {
+    e.preventDefault()
+    console.log("data array", selected)
+    selected.length = 0
+    setSelected([])
+  }
   const handleAdd = async (e) => {
     e.preventDefault();
     let done = true;
@@ -145,7 +183,8 @@ const Billing = () => {
             method: "POST",
             url: `${url.api}/billing/calculate?page=1`,
             headers: tokenHeader(),
-            data: {start_date: update.startDate, end_date: update.endDate, start_time: update.startDate, end_time: update.endTime, id_serial: serial},
+            data: post
+            // data: {start_date: update.startDate, end_date: update.endDate, start_time: update.startDate, end_time: update.endTime, meters: resultSelected},
           })
             .then((res) => {
               console.log('res calculate',res);
@@ -155,7 +194,7 @@ const Billing = () => {
                 "success"
               );
               hideLoader();
-              nav(`${process.env.PUBLIC_URL}/dashboardUser/${layout}`);
+              nav(`${process.env.PUBLIC_URL}/calculate/${layout}`);
             })
             .catch((err) => {
               console.log(err);
@@ -179,15 +218,17 @@ const Billing = () => {
   };
   // const handleCalculate = () => {
 
-  useEffect(()=> {
-    let isi = [];
-    let isinya = selected.map((val,i) => {
-      let isine = val.value;
-      return isi.push(isine)
-    })
-    setSerial(JSON.stringify(isi));
-  }, [multidata]);
-
+  // useEffect(()=> {
+  //   let isi = [];
+  //   let isinya = selected.map((val,i) => {
+  //     let isine = val.value;
+  //     return isi.push(isine)
+  //   })
+  //   setSerial(JSON.stringify(isi));
+  // }, [multidata]);
+  // console.log('serial', serial)
+  console.log('selected', selected)
+  console.log('master data', meterData.tariflwbp)
   return (
     <>
       <Container
@@ -213,11 +254,11 @@ const Billing = () => {
           }}
           onSubmit={handleAdd}
         >
-          <Row>
-            <Col sm={12} md={6} lg={4}>
-              <FormGroup row>
+          <FormGroup>
+            <Row className="d-flex justify-content-between ms-3 me-3">
+              <Col sm={12} lg={4} md={4}>
                 <Row>
-                  <Col>
+                  <Col sm={12} lg={6} md={6}>
                     <Label
                       for="tarif lwbp"
                       className="text-start text-light fw-bold"
@@ -225,16 +266,16 @@ const Billing = () => {
                       Tarif LWBP/kWh (Rp.)
                     </Label>
                   </Col>
-                </Row>
-                <Row>
-                  <Col>
+                  <Col sm={12} lg={6} md={6}>
                     <input
                       id="tarif lwbp"
                       name="tarif lwbp"
                       placeholder="Masukan Tarif LWBP"
                       type="number"
-                      value={meterData.tariflwbp}
+                      defaultValue={meterData.tariflwbp}
+                      // value={meterData.tariflwbp}
                       onChange={(t) => {
+                        console.log('event', t)
                         setUpdate({
                           ...update,
                           tariflwbp: t.target.value,
@@ -243,10 +284,8 @@ const Billing = () => {
                     />
                   </Col>
                 </Row>
-              </FormGroup>
-              <FormGroup row>
                 <Row>
-                  <Col>
+                  <Col sm={12} lg={6} md={6}>
                     <Label
                       for="tarifwbp"
                       className="text-start text-light fw-bold me-2"
@@ -254,15 +293,14 @@ const Billing = () => {
                       Tarif WBP/kWh (Rp.)
                     </Label>
                   </Col>
-                </Row>
-                <Row>
-                  <Col>
+                  <Col sm={12} lg={6} md={6}>
                     <input
                       id="tarifwbp"
                       name="tarifwbp"
                       placeholder="Masukan Tarif WBP Biling"
                       type="number"
-                      value={meterData.tarifwbp}
+                      defaultValue={meterData.tarifwbp}
+                      // value={meterData.tarifwbp}
                       onChange={(t) => {
                         setUpdate({
                           ...update,
@@ -272,173 +310,156 @@ const Billing = () => {
                     />
                   </Col>
                 </Row>
-              </FormGroup>
-              <FormGroup>
                 <Row>
-                  <Col sm={12}>
+                  <Col sm={12} lg={6} md={6}>
                     <Label
                       for="enddate"
                       className="text-start text-light fw-bold"
                     >
                       Start Date
                     </Label>
-                    <input
-                      type="date"
-                      onChange={(t) =>
-                        setUpdate({ ...update, startDate: t.target.value })
-                      }
-                    />
-                    {/* <DatePicker
+                  </Col>
+                  <Col sm={12} lg={6} md={6}>
+                    {/* <input
+                          type="date"
+                          onChange={(t) =>
+                            setUpdate({ ...update, startDate: t.target.value })
+                          }
+                        /> */}
+                    <DatePicker
                       style={DateStyled}
                       dateFormat="dd/MM/yy"
                       dropdownMode="select"
                       showMonthDropdown
                       showYearDropdown
-                      adjustDateOnChange
+                      // adjustDateOnChange
+                      filterDate={date => date.getDay() != 6}
                       // showTimeSelect
-                      locale="es"
+                      // locale="es"
                       selected={startDate}
                       // value={default_value}
-                      onChange={handleDate}
-                    /> */}
+                      onChange={setStartDate}
+                    />
                   </Col>
-                  <Col sm={12}>
+                </Row>
+                <Row>
+                  <Col sm={12} lg={6} md={6}>
                     <Label
                       for="endtime"
                       className="text-start text-light fw-bold"
                     >
                       Start Time
                     </Label>
+                  </Col>
+                  <Col sm={12} lg={6} md={6}>
                     <input
                       type="time"
-                      onChange={(t) =>
-                        setUpdate({ ...update, startTime: t.target.value })
-                      }
-                    />
-                    {/* <DatePicker
-                      showTimeSelect
-                      showTimeSelectOnly
-                      timeIntervals={5}
-                      timeCaption="Time"
-                      dateFormat="HH:mm"
-                      selected={time}
-                      // value={default_value}
-                      onChange={(e) => {
-                        setTime(e);
-                        genDate(e, "time");
+                      onChange={(t) => {
+                        setUpdate({ ...update, time_from: t.target.value });
                       }}
-                    /> */}
+                    />
                   </Col>
                 </Row>
-              </FormGroup>
-              <FormGroup>
                 <Row>
-                  <Col sm={12}>
+                  <Col sm={12} lg={6} md={6}>
                     <Label
                       for="meterID"
                       className="text-start text-light fw-bold"
                     >
                       End Date
                     </Label>
-                    <input
-                      type="date"
-                      onChange={(t) =>
-                        setUpdate({ ...update, endDate: t.target.value })
-                      }
-                    />
-                    {/* <DatePicker
+                  </Col>
+                  <Col sm={12} lg={6} md={6}>
+                    <DatePicker
                       style={DateStyled}
                       dateFormat="dd-MM-yyyy"
                       dropdownMode="select"
                       showMonthDropdown
                       showYearDropdown
                       adjustDateOnChange
-                      selected={startDate}
+                      selected={endDate}
                       // value={default_value}
                       onChange={(e) => {
-                        setStartDate(e);
-                        genDate(e, "date");
+                        setEndDate(e);
+                        // genDate(e, "date");
                       }}
-                    /> */}
+                    />
                   </Col>
-                  <Col sm={12}>
+                </Row>
+                <Row>
+                  <Col sm={12} lg={6} md={6}>
                     <Label
                       for="meterID"
                       className="text-start text-light fw-bold"
                     >
                       End Time
                     </Label>
+                  </Col>
+                  <Col lg={6} sm={12} md={6}>
                     <input
                       type="time"
+
                       onChange={(t) => {
-                        setUpdate({ ...update, endTime: t.target.value });
+                        setUpdate({ ...update, time_end: t.target.value });
                       }}
                     />
-                    {/* <DatePicker
-                      showTimeSelect
-                      showTimeSelectOnly
-                      timeIntervals={5}
-                      timeCaption="Time"
-                      dateFormat="HH:mm"
-                      selected={time}
-                      // value={default_value}
-                      onChange={(e) => {
-                        setTime(e);
-                        genDate(e, "time");
-                      }}
-                    /> */}
                   </Col>
                 </Row>
-              </FormGroup>
-            </Col>
-            <Col sm={12} md={6} lg={4}>
-              <h6 className="headine">Selectable Items</h6>
-              <Card
-                style={{
-                  width: "18rem",
-                  maxHeight: "405px",
-                  overflowY: "scroll",
-                  borderRadius: "20px",
-                }}
-              >
-                <pre>{JSON.stringify(selected)}</pre>
-                
-                  <MultiSelect
-                    options={multidata.concat(multidataApi)}
-                    value={selected}
-                    onChange={setSelected}
-                    labelledBy={"Select"}
-                    isCreatable={true}
-                    isLoading={false}
-                  />
-              </Card>
-              <Col sm={12} md={6} lg={4}>
+              </Col>
+              <Col sm={12} lg={4} md={4}>
                 <Card
                   style={{
-                    width: "18rem",
-                    maxHeight: "405px",
-                    overflowY: "scroll",
-                    borderRadius: "20px",
-                    marginLeft: "20px",
-                    marginTop: "20px",
+                    width: "22rem",
+                    // maxHeight: "410px",
+                    overflowY: "hidden",
+                    // borderRadius: "2",
+
                   }}
                 >
-                  {selected.map((d) => (
-                    <ListGroup flush>
-                      <ListGroupItem>{d.label}</ListGroupItem>
-                    </ListGroup>
-                  ))}
+                  <MultiSelect
+                    options={dataMeter}
+                    value={selected}
+                    onChange={setSelected}
+                    // labelledBy={"Select"}
+                    disableSearch={true}
+                    isCreatable={true}
+                    disabled={false}
+                    isLoading={false}
+                    debounceDuration={300}
+                    hasSelectAll={true}
+                    className="new-css-rule"
+                  />
+                  <Button type="submit" className="mt-3" color="primary" onClick={handleDelete}>Delete Selected</Button>
+                  {console.log('selected', selected)}
+                </Card>
+              </Col>
+              <Col sm={12} lg={4} md={4}>
+                <Card
+                  style={{
+                    width: "22rem",
+                    // maxHeight: "405px",
+                    overflowY: "hidden",
+                    // borderRadius: "20px",
+                  }}
+                >
+                  <ListGroup flush style={{ height: "400px", backgroundColor: "white", overflowX: "hidden" }}>
+                    {selected.length <= 0 ? [] : selected.map((d, index) => (
+                      <div key={index}>
+                        <ListGroupItem action={true} style={{ overflow: "hidden" }}>{d.label}</ListGroupItem>
+                      </div>
+                    ))}
+                  </ListGroup>
                 </Card>
               </Col>
               <Button
-                className="btn btn-danger px-4 py-1"
-                size="sm"
+                className="btn btn-danger px-4 fs-4"
+                size="lg"
                 type="submit"
               >
                 Calculate <FiChevronRight />
               </Button>
-            </Col>
-          </Row>
+            </Row>
+          </FormGroup>
         </Form>
       </Container>
     </>

@@ -1,9 +1,21 @@
 import React, { Fragment, useState } from "react";
 import Breadcrumb from "../../layout/breadcrumb";
+import axios from "axios";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
+import DatePicker from "react-datepicker";
+import 'react-datepicker/dist/react-datepicker.css';
+import {url,tokenHeader} from "../../helpers/config";
+import useFullPageLoader from "../hooks/useFullPageLoader";
 import {
   Container,
   Row,
   Col,
+  Dropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
   Card,
   CardHeader,
   CardBody,
@@ -11,11 +23,18 @@ import {
   Label,
   FormGroup,
   Button,
+  Input,
+  Accordion,
+  AccordionBody,
+  AccordionHeader,
+  AccordionItem,
+  InputGroup,
 } from "reactstrap";
 import { FiPrinter, FiSearch } from "react-icons/fi";
 import { Line } from "react-chartjs-2";
-import DatePicker from "react-datepicker";
+// import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import Swal from "sweetalert2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -26,6 +45,9 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { useCallback } from "react";
+import { useEffect } from "react";
+import moment from "moment";
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -37,8 +59,88 @@ ChartJS.register(
 );
 
 const TrendAndReport = () => {
+  const [loader, showLoader, hideLoader] = useFullPageLoader();
   const [startDate, setStartDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
+  const [open, setOpen] = useState(1);
+  const [trend, setTrend] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const iniState = {
+    id_name: "",
+    datasource: "",
+    graph_title: "",
+    start_date: "",
+    // end_date: "",
+    // start_time: "",
+    // end_time: "",
+    // remember: "",
+  }
+  const toggle = (id) => {
+    if (open === id) {
+      setOpen();
+    } else {
+      setOpen(id);
+    }
+  };
+  const today = moment().format("DD-MM-YYYY")
+  const [initialValues, setInitialValue] = useState(iniState);
+  const validationSchema = yup
+    .object({
+      id_name: yup
+        .string()
+        .required("Field id name wajib di isi"),
+        // .matches(/^[A-Za-z ,.'-]+$/i, "Yang di input harus alfabet"),
+      datasource: yup.string().required("Fild Show Data wajib di isi"),
+      graph_title: yup.string().required("Fild Model Grafik wajib di isi"),
+      start_date: yup.date().required("Date is required")
+    })
+    .required();
+  const {
+    register,
+    watch,
+    reset,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    mode: "onTouched",
+    reValidateMode: "onChange",
+    defaultValues: initialValues,
+    resolver: yupResolver(validationSchema),
+  });
+  // trend.map((item)=>(
+  //   // console.log("item trennd", item)
+  //   setSelected(item)
+  // ))
+  // console.log('select',selected)
+  const report = [
+    {
+      label: "Hourly",
+      value: "Hourly",
+    },
+    {
+      label: "Detail",
+      value: "Detail",
+    },
+    {
+      label: "Daily",
+      value: "Daily",
+    }
+  ]
+  const modelGrafik = [
+    {
+      label: "--Model Grafik--",
+      value: "",
+    },
+    {
+      label: "Line",
+      value: "Line",
+    },
+    {
+      label: "Bar",
+      value: "Bar"
+    }
+  ]
   const options = {
     responsive: true,
     interaction: {
@@ -98,43 +200,6 @@ const TrendAndReport = () => {
       },
     ],
   };
-  const azb = (v) => {
-    // Jika Date / Tahun/Minute/Second Jika Kurang dari 1 maka tambahkan angka 0 di depannya
-    if (parseInt(v) < 10) {
-      v = "0" + v;
-    }
-    return v;
-  };
-  const genDate = (e, type) => {
-    const d = new Date(e);
-    let year = d.getFullYear();
-    let month = d.getMonth() + 1;
-    //JIka Month yang di pilih sudah lebih dri 12 dan jika month yang di pilih terakhir/tinggal 1 maka tambahkan tahun nya.
-    if (month > 12) {
-      month = 1;
-      ++year;
-    }
-    let date = d.getDate();
-    let hour = d.getHours();
-    let minute = d.getMinutes();
-    let second = d.getSeconds();
-
-    year = azb(year);
-    month = azb(month);
-    date = azb(date);
-    hour = azb(hour);
-    minute = azb(minute);
-    second = azb(second);
-
-    if (type == "date") {
-      return `${date}-${month}-${year}`;
-    } else if (type == "time") {
-      return `${hour}:${minute}:${second}`;
-    } else if (type == "datetime") {
-      return `${date}-${month}-${year} ${hour}:${minute}:${second}`;
-    }
-    return d;
-  };
   const styled = {
     borderRadius: "4px",
     width: "100%",
@@ -156,6 +221,47 @@ const TrendAndReport = () => {
     border: "none",
     height: "35px",
   };
+  const getAll = async () => {
+    showLoader()
+    let profile = localStorage.getItem("profile")
+    await axios({
+      url:`${url.api}/trend/datameter?username=${profile}`,
+      method: "GET",
+      headers: tokenHeader(),
+      data: {},
+    })
+    .then((res) =>{
+      let data = res.data.data;
+      console.log('data tren',data[0])
+      setTrend(data[0])
+      // let dataSelected = trend.map((d)=>(
+      //   // console.log('d',d)
+      //   setSelected(d)
+      // ))
+      hideLoader()
+    })
+    .catch((err)=>{
+      console.log(err)
+      hideLoader()
+      Swal.fire("Sorry", "Data Gagal Di Tampilkan", "error");
+    })
+  };
+  useEffect(()=>{
+    getAll();
+  },[]);
+  console.log("start date", startDate)
+  console.log('state trend', trend)
+  // Select Option
+  trend.map((data)=>(
+    console.log('data trend obj id serial', data.metergroupname)
+  ))
+  // {selected[0].forEach(element => {
+  //   console.log('item dta',element.id_serial)
+  // })}
+  console.log("startDate", moment(startDate).format("L"));
+  const handleInput = (data) => {
+    console.log('data tred', data);
+  }
   return (
     <>
       <Container>
@@ -165,72 +271,113 @@ const TrendAndReport = () => {
         >
           <h1 className="fw-bold fs-3">Meter Group</h1>
         </div>
-        <Form className="bg-black my-3 p-2 rounded" style={{ width: "95%" }}>
+        <Form className="bg-black my-3 p-2 rounded" style={{ width: "95%" }} onSubmit={handleSubmit(handleInput)}>
           <FormGroup>
             <Row>
               <Col sm={4}>
                 <Label for="meterID" className="text-start text-light fw-bold">
                   Meter (Id|Name|Group|Location-Type)
                 </Label>
-                <select
-                  id="jurusan"
-                  name="jurusan"
+                {/* {selected.map((item)=>(
+                  console.log('hasil selected', item)
+                ))} */}
+                <Input
+                  id="id_name"
+                  name="id_name"
                   type="select"
                   style={styled}
+                  defaultValue={watch("id_name")}
+                  {...register("id_name")}
                 >
-                  <option value="Sistem Informasi">
-                    Comp1_1|WWTP NEW|POWER HOUSE & WWTP | WWTP
-                  </option>
-                  <option value="Ekonomi">Ekonomi</option>
-                  <option value="MultiMedia">MultiMedia</option>
-                  <option value="Sipil">Sipil</option>
-                </select>
+                  {trend?.map((data)=>(
+                    <option value={data.metergroupid}>{data.id} | {data.id_name} | {data.area} | {data.lokasi} type {data.type}</option>
+                  ))}
+                </Input>
               </Col>
               <Col sm={2}>
                 <Label for="meterID" className="text-start text-light fw-bold">
                   Show Data
                 </Label>
-                <select
-                  id="jurusan"
-                  name="jurusan"
+                <Input
+                  id="datasource"
+                  name="datasource"
                   type="select"
                   style={styled}
+                  defaultValue={watch("datasource")}
+                  {...register("datasource")}
                 >
-                  <option value="Sistem Informasi">Line</option>
-                  <option value="Ekonomi">Ekonomi</option>
-                  <option value="MultiMedia">MultiMedia</option>
-                  <option value="Sipil">Sipil</option>
-                </select>
+                  {report.map((item, index)=>(
+                    <option key={index} value={item.value}>{item.label}</option>
+                  ))}
+                </Input>
               </Col>
               <Col sm={2}>
-                <Label for="meterID" disabled>
+                <Label for="meterID">
                   Show Data
                 </Label>
-                <select
+                {/* <Accordion open={open} toggle={toggle} style={{position: "relative"}}>
+                  <AccordionItem>
+                    <AccordionHeader targetId="1">Accordion Item 1</AccordionHeader>
+                    <AccordionBody accordionId="1"  style={{position: "absolute", right: "0px", left: "0px", top: "150px", backgroundColor: "red", width: "100%", height: "50px"}}>
+                      <strong>This is the first item&#39;s accordion body.</strong>
+                      You can modify any of this with custom CSS or overriding our default
+                      variables. It&#39;s also worth noting that just about any HTML can
+                      go within the <code>.accordion-body</code>, though the transition
+                      does limit overflow.
+                    </AccordionBody>
+                  </AccordionItem>
+                  <AccordionItem>
+                    <AccordionHeader targetId="2">Accordion Item 2</AccordionHeader>
+                    <AccordionBody accordionId="2">
+                      <strong>This is the second item&#39;s accordion body.</strong>
+                      You can modify any of this with custom CSS or overriding our default
+                      variables. It&#39;s also worth noting that just about any HTML can
+                      go within the <code>.accordion-body</code>, though the transition
+                      does limit overflow.
+                    </AccordionBody>
+                  </AccordionItem>
+                  <AccordionItem>
+                    <AccordionHeader targetId="3">Accordion Item 3</AccordionHeader>
+                    <AccordionBody accordionId="3">
+                      <strong>This is the third item&#39;s accordion body.</strong>
+                      You can modify any of this with custom CSS or overriding our default
+                      variables. It&#39;s also worth noting that just about any HTML can
+                      go within the <code>.accordion-body</code>, though the transition
+                      does limit overflow.
+                    </AccordionBody>
+                  </AccordionItem>
+                </Accordion> */}
+                {/* <Input
                   id="jurusan"
                   name="jurusan"
                   type="select"
                   style={styled}
+                  // style={{width: "100%", height: 30, backgroundColor: "red"}}
                 >
                   <option>Meter Variabel</option>
+                  <div style={{width: "100%", height: 30, backgroundColor: "red"}}>
                   <option value="Sistem Informasi">Hourly</option>
                   <option value="Ekonomi">Month</option>
                   <option value="MultiMedia">Weekday</option>
-                </select>
+                  </div>
+                </Input> */}
               </Col>
               <Col sm={2}>
-                <Label for="meterID" disabled>
-                  Show Data
+                <Label for="graph_title" className="text-start text-light fw-bold">
+                  Model Grafik
                 </Label>
-                <select
-                  id="jurusan"
-                  name="jurusan"
+                <Input
+                  id="graph_title"
+                  name="graph_title"
                   type="select"
                   style={styled}
+                  defaultValue={watch('graph_title')}
+                  {...register("graph_title")}
                 >
-                  <option value="Line">Line</option>
-                  <option value="Bar">Bar</option>
-                </select>
+                  {modelGrafik.map((item, index)=>(
+                    <option key={index} value={item.value}>{item.label}</option>
+                  ))}
+                </Input>
               </Col>
               <Col
                 sm={2}
@@ -262,18 +409,28 @@ const TrendAndReport = () => {
                   Start Date
                 </Label>
                 <DatePicker
+                  style={DateStyled}
                   dateFormat="dd-MM-yyyy"
                   dropdownMode="select"
                   showMonthDropdown
                   showYearDropdown
-                  adjustDateOnChange
+                  // adjustDateOnChange
+                  filterDate={date => date.getDay() !=6}
                   selected={startDate}
                   // value={default_value}
-                  onChange={(e) => {
-                    setStartDate(e);
-                    genDate(e, "date");
-                  }}
+                  // onChange={(start_date) => {
+                  //   setStartDate(start_date);
+                  //   setValue("start_date", start_date)
+                  //   genDate(e, "date");
+                  // }}
+                  onChange={setStartDate}
+                  {...register("start_date")}
                 />
+                {errors.start_date && (
+                <p className="fw-bold text-danger">
+                  {errors.start_date.message}
+                </p>
+              )}
               </Col>
               <Col sm={2}>
                 <Label for="meterID" className="text-start text-light fw-bold">
@@ -289,7 +446,7 @@ const TrendAndReport = () => {
                   // value={default_value}
                   onChange={(e) => {
                     setTime(e);
-                    genDate(e, "time");
+                    // genDate(e, "time");
                   }}
                 />
               </Col>
@@ -308,7 +465,7 @@ const TrendAndReport = () => {
                   // value={default_value}
                   onChange={(e) => {
                     setStartDate(e);
-                    genDate(e, "date");
+                    // genDate(e, "date");
                   }}
                 />
               </Col>
@@ -326,7 +483,7 @@ const TrendAndReport = () => {
                   // value={default_value}
                   onChange={(e) => {
                     setTime(e);
-                    genDate(e, "time");
+                    // genDate(e, "time");
                   }}
                 />
               </Col>
@@ -339,7 +496,7 @@ const TrendAndReport = () => {
                   Search
                 </Button>
               </Col>
-              <Col
+              {/* <Col
                 sm={2}
                 className="d-flex justify-content-center align-items-center mt-3"
               >
@@ -347,7 +504,7 @@ const TrendAndReport = () => {
                   <FiPrinter className="fs-2 text-primary pe-1" />
                   Print PDF
                 </Button>
-              </Col>
+              </Col> */}
             </Row>
             <Row>
               <Col className="col-sm-12">
